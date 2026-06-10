@@ -2,8 +2,10 @@
 //  VisionProcessor.swift
 //  isee
 //
-//  Created by Upmanyu Jha and Updated on 10/25/2025.
+//  Created by Upmanyu Jha and Updated on 6/10/2026.
 //
+//  Processes camera frames using Apple's Vision framework with
+//  adaptive frame-rate throttling to minimise energy use.
 
 
 import Vision
@@ -14,8 +16,43 @@ import UIKit
 import AppKit
 #endif
 
-/// VisionProcessor handles face detection using Apple's Vision framework
-/// Processes camera frames to detect and count faces in real-time
+/// Controls how aggressively we throttle Vision processing.
+/// Lower rates consume significantly less CPU/GPU and battery.
+enum ProcessingSpeed {
+    /// ≈1 FPS — default state: user is alone, just watching for a new face
+    case low
+    /// ≈3 FPS — warning: multiple faces, need more responsiveness
+    case medium
+    /// ≈5 FPS — alert: actively tracking a shoulder surfer
+    case high
+    
+    /// Minimum wall-clock gap between processed frames.
+    var interval: CFTimeInterval {
+        switch self {
+        case .low:    return 1.0    //  1 FPS
+        case .medium: return 0.33   // ~3 FPS
+        case .high:   return 0.2    //  5 FPS
+        }
+    }
+    
+    /// How many raw camera frames to skip between processed ones.
+    /// Camera runs at ≈30 FPS, so skip N-1 frames per processed frame.
+    var frameSkip: Int {
+        switch self {
+        case .low:    return 15  // process every 15th frame → ~2 Hz raw gate
+        case .medium: return 6   // every 6th → ~5 Hz raw gate
+        case .high:   return 3   // every 3rd → ~10 Hz raw gate (original)
+        }
+    }
+}
+
+/// VisionProcessor handles face detection using Apple's Vision framework.
+/// Processes camera frames to detect and count faces in real-time.
+///
+/// Energy-saving design:
+/// - **Adaptive FPS**: throttles down to 1 FPS in safe state, up to 5 FPS in alert
+/// - **Two-stage gate**: frame-skip (coarse) + wall-clock interval (fine)
+/// - **Throttle counters reset** on speed change to avoid a stale delay
 class VisionProcessor: NSObject, ObservableObject {
     
     // MARK: - Published Properties
@@ -28,11 +65,23 @@ class VisionProcessor: NSObject, ObservableObject {
     private var faceDetectionRequest: VNDetectFaceRectanglesRequest!
     private let processingQueue = DispatchQueue(label: "vision.processing.queue", qos: .userInitiated)
     
-    // Performance optimization
+    // Two-stage throttle: coarse frame skip + fine wall-clock gate
     private var lastProcessTime: CFTimeInterval = 0
-    private let processingInterval: CFTimeInterval = 0.2 // Process every 200ms (5 FPS)
     private var frameSkipCounter = 0
-    private let frameSkipInterval = 3 // Process every 3rd frame
+    
+    /// Current processing speed.  Changing it resets the throttle counters
+    /// so the new rate takes effect immediately instead of waiting for a
+    /// stale skip-count or time-gate to expire.
+    private var processingSpeed: ProcessingSpeed = .high {
+        didSet {
+            guard oldValue != processingSpeed else { return }
+            lastProcessTime = 0
+            frameSkipCounter = 0
+        }
+    }
+    
+    private var processingInterval: CFTimeInterval { processingSpeed.interval }
+    private var frameSkipInterval: Int { processingSpeed.frameSkip }
     
     // MARK: - Initialization
     override init() {
@@ -49,22 +98,25 @@ class VisionProcessor: NSObject, ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Process a camera frame for face detection
-    /// - Parameter sampleBuffer: The camera frame to analyze
+    /// Adjust processing speed based on the current security state.
+    /// - Parameter speed: target speed; the processor will switch immediately
+    func setProcessingSpeed(_ speed: ProcessingSpeed) {
+        processingSpeed = speed
+    }
+    
+    /// Process a camera frame for face detection.
+    /// - Parameter sampleBuffer: The camera frame to analyze.
     func processFrame(_ sampleBuffer: CMSampleBuffer) {
         guard !isProcessing else { return }
         
-        // Performance optimization: Skip frames and limit processing frequency
+        // ── Coarse gate: skip N-1 frames ──
         frameSkipCounter += 1
-        if frameSkipCounter < frameSkipInterval {
-            return
-        }
+        guard frameSkipCounter >= frameSkipInterval else { return }
         frameSkipCounter = 0
         
+        // ── Fine gate: enforce minimum wall-clock gap ──
         let currentTime = CACurrentMediaTime()
-        if currentTime - lastProcessTime < processingInterval {
-            return
-        }
+        guard currentTime - lastProcessTime >= processingInterval else { return }
         lastProcessTime = currentTime
         
         processingQueue.async { [weak self] in
@@ -89,7 +141,9 @@ class VisionProcessor: NSObject, ObservableObject {
                 // Perform face detection
                 try imageRequestHandler.perform([self.faceDetectionRequest])
             } catch {
+                #if DEBUG
                 print("Face detection failed: \(error.localizedDescription)")
+                #endif
                 DispatchQueue.main.async {
                     self.isProcessing = false
                 }
@@ -106,7 +160,9 @@ class VisionProcessor: NSObject, ObservableObject {
             self.isProcessing = false
             
             if let error = error {
+                #if DEBUG
                 print("Face detection error: \(error.localizedDescription)")
+                #endif
                 return
             }
             
@@ -119,11 +175,6 @@ class VisionProcessor: NSObject, ObservableObject {
             // Update detected faces and count
             self.detectedFaces = observations
             self.faceCount = observations.count
-            
-            // Log face detection results for debugging
-            if self.faceCount > 0 {
-                print("Detected \(self.faceCount) face(s)")
-            }
         }
     }
 }

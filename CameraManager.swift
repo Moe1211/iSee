@@ -133,10 +133,18 @@ class CameraManager: NSObject, ObservableObject {
     private func configureCaptureSession() {
         captureSession.beginConfiguration()
         
-        // Set session preset for optimal performance
-        if captureSession.canSetSessionPreset(.medium) {
-            captureSession.sessionPreset = .medium
+        // Use the lowest resolution that still works well for face detection.
+        // Vision framework detects faces reliably at 640×480, which cuts
+        // sensor readout power, memory bandwidth, and pixel pipeline work
+        // compared to the default .medium (~720p).
+        let presets: [AVCaptureSession.Preset] = [.vga640x480, .low, .medium]
+        for preset in presets where captureSession.canSetSessionPreset(preset) {
+            captureSession.sessionPreset = preset
+            break
         }
+        
+        // Drop late frames instead of queueing them up when the processor is busy
+        videoOutput.alwaysDiscardsLateVideoFrames = true
         
         // Add video input (front camera)
         guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {

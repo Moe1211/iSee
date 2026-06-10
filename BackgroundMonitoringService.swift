@@ -197,6 +197,9 @@ class BackgroundMonitoringService: ObservableObject {
         // Handle auto-blur privacy overlay
         handlePrivacyBlur(for: state)
         
+        // Throttle vision processing to match the current threat level
+        adjustProcessingSpeed(for: state)
+        
         // Note: Camera overlay is opened manually via "Toggle Camera Feed" menu item
         // or via "Preview" button in notification popup - not automatically on alert
         switch state {
@@ -233,6 +236,27 @@ class BackgroundMonitoringService: ObservableObject {
             // Don't blur during warning state — only when the alert threshold is crossed
             break
         }
+    }
+    
+    /// Adjust Vision processing speed to match the threat level.
+    ///
+    /// - **Safe / Error** → 1 FPS: user is alone, just watching for a new face
+    /// - **Warning** → 3 FPS: someone may be there, increase vigilance
+    /// - **Alert** → 5 FPS: actively tracking a shoulder surfer
+    ///
+    /// This is the single biggest battery-saving measure in the app since
+    /// the vision pipeline runs 100 % of the time monitoring is active.
+    private func adjustProcessingSpeed(for state: StateController.SecurityState) {
+        let speed: ProcessingSpeed
+        switch state {
+        case .safe, .error:
+            speed = .low
+        case .warning:
+            speed = .medium
+        case .alert:
+            speed = .high
+        }
+        visionProcessor.setProcessingSpeed(speed)
     }
     
     private func handleAlertDurationTracking(for state: StateController.SecurityState) {

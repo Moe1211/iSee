@@ -23,7 +23,7 @@ class StateController: ObservableObject {
     private var faceCountTimer: Timer?
     private var stateTimer: Timer?
     private let alertThreshold: TimeInterval = 2.0 // 2 seconds before alert
-    private let stateUpdateInterval: TimeInterval = 0.1 // Update every 100ms
+    private let stateUpdateInterval: TimeInterval = 0.5 // Update every 500ms (was 100ms — 5× fewer CPU wake-ups)
     
     // Edge case handling
     private var consecutiveZeroFaceCount = 0
