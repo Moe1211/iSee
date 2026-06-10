@@ -122,12 +122,20 @@ class ScreenBlurManager: ObservableObject {
             buildWindows()
         }
         
-        // Update frame in case screen layout changed while we were hidden
-        for (index, window) in blurWindows.enumerated() {
-            if index < NSScreen.screens.count {
-                let screen = NSScreen.screens[index]
-                if window.screen?.screenID != screen.screenID {
+        // Update frames — match windows to screens by ID (not index, which can
+        // break when displays are rearranged or the screen-order array changes).
+        let screenMap: [String: NSScreen] = Dictionary(
+            uniqueKeysWithValues: NSScreen.screens.map { ($0.screenID, $0) }
+        )
+        for window in blurWindows {
+            if let windowID = window.screen?.screenID, let screen = screenMap[windowID] {
+                if window.frame != screen.frame {
                     window.setFrame(screen.frame, display: true)
+                }
+            } else {
+                // Window's screen is gone — place on the first available screen
+                if let firstScreen = NSScreen.screens.first {
+                    window.setFrame(firstScreen.frame, display: true)
                 }
             }
             window.orderFrontRegardless()
@@ -217,6 +225,9 @@ class ScreenBlurManager: ObservableObject {
         }
     }
     
+    /// Respond to screen layout changes (display connected/disconnected/resized).
+    /// Rebuilds all blur windows when the screen configuration changes so each
+    /// window stays aligned with its display.
     @objc private func screenConfigurationChanged() {
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self] in self?.screenConfigurationChanged() }
@@ -226,6 +237,9 @@ class ScreenBlurManager: ObservableObject {
         rebuildWindows()
     }
     
+    /// Create a blur window for each active display.
+    /// Called once during `showBlur()` if windows haven't been prepared yet,
+    /// and on screen-configuration changes.
     private func buildWindows() {
         blurWindows = NSScreen.screens.map { createBlurWindow(for: $0) }
         windowsPrepared = true
@@ -461,8 +475,14 @@ private let escapeHotKeyProc: EventHandlerProcPtr = { (_, event, _) -> OSStatus 
 // MARK: - Screen identity helper
 
 private extension NSScreen {
-    /// A simple unique identifier for a screen based on its device description.
+    /// A stable unique identifier for a screen.
+    /// Uses the hardware NSScreenNumber when available, falling back to
+    /// frame origin + size — this avoids the "unknown" collision that
+    /// can occur with virtual displays, Sidecar, or AirPlay.
     var screenID: String {
-        "\(self.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] ?? "unknown")"
+        if let number = self.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] {
+            return "\(number)"
+        }
+        return "\(self.frame.origin.x),\(self.frame.origin.y),\(self.frame.size.width),\(self.frame.size.height)"
     }
 }
