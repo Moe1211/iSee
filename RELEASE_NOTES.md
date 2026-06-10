@@ -1,5 +1,74 @@
 # iSee Release Notes
 
+## 🎉 Beta V1.1.0 - June 10, 2026
+
+### ✨ Major New Features
+
+#### 🛡️ **Auto-Blur Privacy Overlay** (Screen Protection)
+- **Full-Screen Blur**: When a shoulder surfer is detected, all displays are covered with a privacy blur that obscures on-screen content while still letting the user perceive layout/brightness
+- **Multi-Monitor Support**: Blur windows span every connected display automatically
+- **Adaptive FPS**: Vision processing throttles intelligently — 1 FPS in safe mode (~80% CPU savings vs always-on), 3 FPS in warning, 5 FPS in alert
+- **Camera Resolution**: Lowered to 640×480 (VGA) with `.alwaysDiscardsLateVideoFrames` — cuts sensor readout power and memory bandwidth with no impact on face-detection accuracy
+- **Crash Fix**: Replaced window close/recreate cycle with keep-alive pattern — eliminates `SIGSEGV` on autorelease-pool drain during rapid show/hide
+- **Opt-in Default**: Auto-blur must be enabled in Settings; won't activate without user consent
+
+#### 🎨 **Blur Customization**
+- **Blur Material**: Choose from 5 non-deprecated `NSVisualEffectView` materials (Tool Tip, Menu, HUD Window, Popover, Sidebar)
+- **Overlay Color**: Pick any color as the blur backdrop
+- **Overlay Opacity**: Adjust from 0% (transparent) to 100% (solid)
+- **Custom Image**: Select any image from disk — displayed behind the colored overlay as a tinted backdrop (ideal for dark wallpapers)
+- **Custom Text**: Replace the privacy indicator text with your own message
+- **Live Preview**: All changes apply instantly while the blur is active — no restart needed
+- **Reset to Defaults**: One-click restore of factory blur settings
+
+#### ⌨️ **Escape to Dismiss** (Global Hotkey)
+- **Carbon `RegisterEventHotKey`**: Escape key dismisses the overlay system-wide, even when iSee is not the active app
+- **No Extra Permissions**: Unlike `CGEvent.tap`, Carbon hotkeys work without accessibility or input-monitoring permissions
+- **Non-Exclusive**: The Escape key press also passes through to the active app (standard macOS behavior, no harm)
+
+#### 🖱️ **Click to Dismiss** (Toggleable)
+- **Global Mouse Monitor**: Any click — left, right, or middle — dismisses the privacy overlay
+- **Togglable**: Enable/disable in Settings → Blur Customization
+- **Pass-Through**: The click reaches the app underneath after dismissal (via `NSEvent.addGlobalMonitorForEvents`)
+- **Works With Escape**: Both dismissal methods active simultaneously when enabled
+
+#### 📷 **Camera Preview Before Blur**
+- **Notch Pre-View**: When a shoulder surfer is detected, the camera feed appears in the notch for a configurable duration before the blur activates
+- **Configurable Delay**: Adjustable 0.5–10 seconds in Settings (default 1.5s)
+- **Optional**: Toggle on/off independently in Settings
+- **Smart Cancellation**: If the threat clears during the countdown, the preview closes and blur never activates
+
+### ⚙️ **Settings UI Enhancements**
+- **New "Blur Customization" Section**: All blur-related controls grouped in one place
+- **Color Picker**: Native `ColorPicker` for choosing overlay color
+- **Image Browser**: NSOpenPanel integration for selecting custom background images
+- **Settings Window**: Now resizable and scrollable; increased default size to accommodate new controls
+- **Dismiss Menu Item**: "Dismiss Privacy Blur" appears in the menu bar when blur is active
+
+### 🔧 **Technical Improvements**
+- **Adaptive Vision Pipeline**: `ProcessingSpeed` enum (`low`/`medium`/`high`) controls frame rate based on threat level; throttle counters reset on speed change
+- **Console Cleanup**: All `print()` debug output wrapped in `#if DEBUG`
+- **Window Level**: Blur runs at `.screenSaver` level — covers all Spaces, full-screen apps, and system overlays
+- **Mouse Passthrough**: Blur windows ignore mouse events so users can keep working while protected
+- **Architecture**: Blur and speed changes wired through `handleStateChange` in `BackgroundMonitoringService`, keeping the state machine as the single source of truth
+
+### 📦 **Release Build**
+- **DMG**: `releases/iSee-beta-v1.1.0.dmg` (~280K)
+- **Signed Off**: `CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO` — unsigned, Gatekeeper bypass instructions in README
+- **Minimum OS**: macOS 13.0+ (Ventura)
+
+---
+
+### 🔮 Upcoming Features (v1.2.0)
+- Multiple camera support (external cameras)
+- Integration with macOS Focus modes
+- Customizable keyboard shortcuts
+- Detection accuracy statistics and logging
+- Performance metrics dashboard
+- Custom notification sounds
+
+---
+
 ## 🎉 Beta V1.0.0 - October 25, 2025
 
 ### ✨ Latest Updates & Fixes
@@ -147,9 +216,9 @@
 
 ---
 
-**Latest Download**: [iSee-beta-v1.0.0.dmg](https://github.com/hackergod00001/iSee/releases/download/beta-v1.0.0/iSee-beta-v1.0.0.dmg) (200K)
+**Latest Download**: [iSee-beta-v1.1.0.dmg](https://github.com/hackergod00001/iSee/releases/download/beta-v1.1.0/iSee-beta-v1.1.0.dmg) (280K)
 
-**Previous Version**: [iSee-v0.1.0.dmg](https://github.com/hackergod00001/iSee/releases/download/v0.1.0/iSee-v0.1.0.dmg) (168K)
+**Previous Versions**: [iSee-beta-v1.0.0.dmg](https://github.com/hackergod00001/iSee/releases/download/beta-v1.0.0/iSee-beta-v1.0.0.dmg) (200K) · [iSee-v0.1.0.dmg](https://github.com/hackergod00001/iSee/releases/download/v0.1.0/iSee-v0.1.0.dmg) (168K)
 
 **Source Code**: [GitHub Repository](https://github.com/hackergod00001/iSee)
 

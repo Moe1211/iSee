@@ -223,19 +223,68 @@ class BackgroundMonitoringService: ObservableObject {
     }
     
     /// Show or hide the privacy blur based on the current security state
-    /// and user preference.
+    /// and user preference.  If enabled, shows a camera-preview delay
+    /// (configurable via `blurPreviewDelay`) before activating the blur.
     private func handlePrivacyBlur(for state: StateController.SecurityState) {
-        guard preferencesManager.autoBlurEnabled else { return }
+        guard preferencesManager.autoBlurEnabled else {
+            cancelBlurPreview()
+            ScreenBlurManager.shared.hideBlur()
+            return
+        }
         
         switch state {
         case .alert:
-            ScreenBlurManager.shared.showBlur()
+            let delay = preferencesManager.blurPreviewDelay
+            let previewEnabled = preferencesManager.blurPreviewEnabled
+            
+            if previewEnabled && delay > 0 {
+                startBlurPreview(delay: delay)
+            } else {
+                cancelBlurPreview()
+                ScreenBlurManager.shared.showBlur()
+            }
+            
         case .safe, .error:
+            cancelBlurPreview()
             ScreenBlurManager.shared.hideBlur()
+            
         case .warning:
             // Don't blur during warning state — only when the alert threshold is crossed
-            break
+            cancelBlurPreview()
         }
+    }
+    
+    /// Show the camera preview in the notch and schedule the blur after `delay` seconds.
+    private func startBlurPreview(delay: TimeInterval) {
+        // Don't restart if already previewing
+        guard !isBlurPreviewing else { return }
+        isBlurPreviewing = true
+        
+        // Show the notch camera preview
+        showOverlay()
+        
+        // Schedule blur activation after the delay
+        blurPreviewTimer?.invalidate()
+        blurPreviewTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            self.isBlurPreviewing = false
+            self.blurPreviewTimer = nil
+            
+            // Only show blur if we're still in alert state
+            guard self.currentState == .alert else { return }
+            
+            // Camera preview stays visible — it's separate from the blur overlay
+            ScreenBlurManager.shared.showBlur()
+        }
+    }
+    
+    /// Cancel in-progress blur preview (e.g. because the threat passed).
+    private func cancelBlurPreview() {
+        guard isBlurPreviewing else { return }
+        isBlurPreviewing = false
+        blurPreviewTimer?.invalidate()
+        blurPreviewTimer = nil
+        hideOverlay()
     }
     
     /// Adjust Vision processing speed to match the threat level.
@@ -331,6 +380,10 @@ class BackgroundMonitoringService: ObservableObject {
     // MARK: - Private Properties for Alert Duration Tracking
     private var alertStartTime: Date?
     private var alertDurationTimer: Timer?
+    
+    // MARK: - Private Properties for Blur Preview
+    private var blurPreviewTimer: Timer?
+    private var isBlurPreviewing = false
     
     // MARK: - Computed Properties
 }

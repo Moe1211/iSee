@@ -2,7 +2,7 @@
 //  PreferencesManager.swift
 //  isee
 //
-//  Created by Upmanyu Jha and Updated on 10/25/2025.
+//  Created by Upmanyu Jha and Updated on 6/10/2026.
 //
 
 
@@ -26,6 +26,15 @@ class PreferencesManager: ObservableObject {
         static let overlayAutoHideDelay = "overlayAutoHideDelay"
         static let alertThreshold = "alertThreshold"
         static let autoBlurEnabled = "autoBlurEnabled"
+        // Blur customization
+        static let blurMaterialIndex = "blurMaterialIndex"
+        static let blurOverlayColor = "blurOverlayColor"
+        static let blurOverlayOpacity = "blurOverlayOpacity"
+        static let blurCustomImagePath = "blurCustomImagePath"
+        static let blurCustomText = "blurCustomText"
+        static let blurClickToDismiss = "blurClickToDismiss"
+        static let blurPreviewEnabled = "blurPreviewEnabled"
+        static let blurPreviewDelay = "blurPreviewDelay"
     }
     
     // MARK: - Published Properties
@@ -79,6 +88,67 @@ class PreferencesManager: ObservableObject {
         }
     }
     
+    // MARK: - Blur Customization Properties
+    
+    /// Index into `ScreenBlurManager.BlurMaterial` (0 = toolTip darkest)
+    @Published var blurMaterialIndex: Int {
+        didSet {
+            userDefaults.set(blurMaterialIndex, forKey: Keys.blurMaterialIndex)
+        }
+    }
+    
+    /// Overlay color (archived NSColor)
+    @Published var blurOverlayColor: NSColor {
+        didSet {
+            let data = try? NSKeyedArchiver.archivedData(withRootObject: blurOverlayColor, requiringSecureCoding: false)
+            userDefaults.set(data, forKey: Keys.blurOverlayColor)
+        }
+    }
+    
+    /// Overlay opacity 0.0 – 1.0 (default 0.65)
+    @Published var blurOverlayOpacity: Double {
+        didSet {
+            userDefaults.set(blurOverlayOpacity, forKey: Keys.blurOverlayOpacity)
+        }
+    }
+    
+    /// Optional file path to a custom image displayed behind the colored overlay
+    @Published var blurCustomImagePath: String? {
+        didSet {
+            userDefaults.set(blurCustomImagePath, forKey: Keys.blurCustomImagePath)
+        }
+    }
+    
+    /// Custom text shown in the bottom-right corner
+    @Published var blurCustomText: String {
+        didSet {
+            userDefaults.set(blurCustomText, forKey: Keys.blurCustomText)
+        }
+    }
+    
+    /// When enabled, a mouse click anywhere dismisses the privacy blur
+    @Published var blurClickToDismiss: Bool {
+        didSet {
+            userDefaults.set(blurClickToDismiss, forKey: Keys.blurClickToDismiss)
+        }
+    }
+    
+    /// When enabled, the notch camera preview shows for `blurPreviewDelay` seconds
+    /// before the full-screen blur activates.
+    @Published var blurPreviewEnabled: Bool {
+        didSet {
+            userDefaults.set(blurPreviewEnabled, forKey: Keys.blurPreviewEnabled)
+        }
+    }
+    
+    /// How long the camera preview stays visible before the blur activates (0.5 – 10 s)
+    @Published var blurPreviewDelay: TimeInterval {
+        didSet {
+            userDefaults.set(blurPreviewDelay, forKey: Keys.blurPreviewDelay)
+        }
+    }
+    
+    /// Non-published, backwards-compatible storage
     var showWelcomeScreen: Bool {
         get {
             return userDefaults.bool(forKey: Keys.showWelcomeScreen)
@@ -107,6 +177,23 @@ class PreferencesManager: ObservableObject {
             // Default position: top-center of screen
             self.overlayPosition = CGPoint(x: 0, y: 0) // Will be set to actual screen position later
         }
+        
+        // Load blur customization
+        self.blurMaterialIndex = userDefaults.object(forKey: Keys.blurMaterialIndex) as? Int ?? 0
+        self.blurOverlayOpacity = userDefaults.object(forKey: Keys.blurOverlayOpacity) as? Double ?? 0.65
+        
+        if let colorData = userDefaults.data(forKey: Keys.blurOverlayColor),
+           let color = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: colorData) {
+            self.blurOverlayColor = color
+        } else {
+            self.blurOverlayColor = NSColor.black
+        }
+        
+        self.blurCustomImagePath = userDefaults.string(forKey: Keys.blurCustomImagePath)
+        self.blurCustomText = userDefaults.string(forKey: Keys.blurCustomText) ?? "🛡 iSee Privacy Active"
+        self.blurClickToDismiss = userDefaults.object(forKey: Keys.blurClickToDismiss) as? Bool ?? true
+        self.blurPreviewEnabled = userDefaults.object(forKey: Keys.blurPreviewEnabled) as? Bool ?? true
+        self.blurPreviewDelay = userDefaults.object(forKey: Keys.blurPreviewDelay) as? TimeInterval ?? 1.5
     }
     
     // MARK: - Public Methods
@@ -121,6 +208,20 @@ class PreferencesManager: ObservableObject {
         autoBlurEnabled = false
         overlayPosition = CGPoint(x: 0, y: 0)
         showWelcomeScreen = true
+        
+        resetBlurCustomization()
+    }
+    
+    /// Reset only the blur customization to factory defaults
+    func resetBlurCustomization() {
+        blurMaterialIndex = 0
+        blurOverlayColor = NSColor.black
+        blurOverlayOpacity = 0.65
+        blurCustomImagePath = nil
+        blurCustomText = "🛡 iSee Privacy Active"
+        blurClickToDismiss = true
+        blurPreviewEnabled = true
+        blurPreviewDelay = 1.5
     }
     
     /// Save current overlay position

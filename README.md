@@ -4,7 +4,7 @@
 [![Swift](https://img.shields.io/badge/Swift-5.0+-orange.svg)](https://swift.org/)
 [![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)](https://developer.apple.com/xcode/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-Beta%20V1.0.0-brightgreen.svg)](https://github.com/hackergod00001/iSee/releases)
+[![Version](https://img.shields.io/badge/Version-Beta%20V1.1.0-brightgreen.svg)](https://github.com/hackergod00001/iSee/releases)
 
 iSee is a sophisticated macOS menu bar application that provides real-time shoulder surfer detection using your MacBook's camera. It runs silently in the background and alerts you when someone is looking at your screen, featuring intelligent long-term threat detection, a beautiful Dynamic Island-style notch integration, and comprehensive privacy-first security features.
 
@@ -42,6 +42,8 @@ open isee.xcodeproj
 - **Smart State Management**: Color-coded menu bar icon (Green/Yellow/Orange/Red/Gray)
 - **Configurable Thresholds**: Customizable alert timing and sensitivity
 - **Rate-limited Notifications**: Prevents notification spam with intelligent cooldown periods
+- **Auto-Blur Privacy Overlay**: Full-screen privacy blur activates when shoulder surfers are detected across all displays
+- **Blur Customization**: Customizable blur material, overlay color, opacity, background image, and message text
 
 ### 🎨 **Beautiful Interface**
 - **Dynamic Island Notch Integration**: Camera feed displays in Mac's notch area with smooth animations
@@ -347,7 +349,7 @@ For detailed testing procedures, see [TESTING_GUIDE.md](TESTING_GUIDE.md)
 **Long-term Roadmap:**
 - Machine learning model for improved accuracy and fewer false positives
 - Multi-camera support (external cameras, different angles)
-- Screen content privacy features (automatic screen blur when alert triggers)
+- Keyboard shortcut customization
 - macOS Focus mode integration (automatic monitoring based on focus state)
 - Customizable notch themes and animations
 - Cloud sync for preferences across multiple Macs
@@ -399,8 +401,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ---
 
-**Version**: Beta V1.0.0  
-**Last Updated**: October 25, 2025  
+**Version**: Beta V1.1.0  
+**Last Updated**: June 10, 2026  
 **Created by**: Upmanyu Jha
 
 **Note**: This app demonstrates advanced privacy-first security applications using Apple's on-device machine learning capabilities. It's designed for real-world use with comprehensive testing and optimization. The Dynamic Island integration leverages the NotchNotification framework (originally created by 秋星桥, modified for iSee).
