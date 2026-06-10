@@ -62,6 +62,22 @@ struct SettingsView: View {
                     
                     Slider(value: $preferencesManager.alertThreshold, in: 1...10, step: 1)
                 }
+                
+                Section("Privacy") {
+                    Toggle("Auto-blur Screen on Detection", isOn: $preferencesManager.autoBlurEnabled)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("When enabled, iSee will apply a full-screen blur overlay across all displays when a shoulder surfer is detected. The blur auto-dismisses when the threat passes.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text("Press Escape to dismiss the blur manually. All processing is on-device.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .italic()
+                    }
+                    .padding(.vertical, 2)
+                }
             }
             .formStyle(.grouped)
             

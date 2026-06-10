@@ -131,6 +131,10 @@ class MenuBarController: ObservableObject {
         SettingsWindow.shared.showWindow()
     }
     
+    func dismissBlur() {
+        ScreenBlurManager.shared.hideBlur()
+    }
+    
     func quitApp() {
         NSApplication.shared.terminate(nil)
     }

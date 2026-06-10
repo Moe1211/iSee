@@ -31,6 +31,7 @@
 		A1234567890ABCDEF00A /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF009 /* CameraManager.swift */; };
 		A1234567890ABCDEF00C /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF00B /* VisionProcessor.swift */; };
 		A1234567890ABCDEF00E /* StateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF00D /* StateController.swift */; };
+		6F20FF022EA3B9D500D45C80 /* ScreenBlurManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F20FF012EA3B9D500D45C80 /* ScreenBlurManager.swift */; };
 		CD374F805C2295F5B8E21034 /* NotchNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB4D03E1871D83AB14D2331 /* NotchNotification.swift */; };
 		D480C3206D6A0D00B0B84515 /* NotificationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A279C81A1EB1AB81F0CC209E /* NotificationContext.swift */; };
 		F35B670E0AB20151934EB223 /* NotchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B6C655FDBA21470EFB786F /* NotchHeaderView.swift */; };
@@ -59,6 +60,7 @@
 		A1234567890ABCDEF00B /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF00D /* StateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateController.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F20FF012EA3B9D500D45C80 /* ScreenBlurManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenBlurManager.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEFFD /* isee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = isee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A279C81A1EB1AB81F0CC209E /* NotificationContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationContext.swift; sourceTree = "<group>"; };
 		B7E2E08A2E49E40F9B53ED75 /* NotchView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotchView.swift; sourceTree = "<group>"; };
@@ -93,7 +95,6 @@
 				29BAE7D37CEFD0E600FCAB86 /* NotchWindowController.swift */,
 				A279C81A1EB1AB81F0CC209E /* NotificationContext.swift */,
 			);
-			name = NotchNotification;
 			path = NotchNotification;
 			sourceTree = "<group>";
 		};
@@ -108,7 +109,7 @@
 		A1234567890ABCDEFF4 = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEFFF /*  */,
+				A1234567890ABCDEFFF,
 				A1234567890ABCDEFFE /* Products */,
 				66646815D4D441BE7DE1DCB2 /* NotchNotification */,
 				DA01A8931DFE01F033FD64EC /* CameraNotchManager.swift */,
@@ -123,7 +124,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1234567890ABCDEFFF /*  */ = {
+		A1234567890ABCDEFFF = {
 			isa = PBXGroup;
 			children = (
 				6F20B3842EA3BA8700D45C80 /* BackgroundMonitoringService.swift */,
@@ -140,6 +141,7 @@
 				A1234567890ABCDEF009 /* CameraManager.swift */,
 				A1234567890ABCDEF00B /* VisionProcessor.swift */,
 				A1234567890ABCDEF00D /* StateController.swift */,
+				6F20FF012EA3B9D500D45C80 /* ScreenBlurManager.swift */,
 				A1234567890ABCDEF004 /* Assets.xcassets */,
 				A1234567890ABCDEF011 /* Info.plist */,
 				A1234567890ABCDEF006 /* Preview Content */,
@@ -219,6 +221,7 @@
 				A1234567890ABCDEF00A /* CameraManager.swift in Sources */,
 				A1234567890ABCDEF00C /* VisionProcessor.swift in Sources */,
 				A1234567890ABCDEF00E /* StateController.swift in Sources */,
+				6F20FF022EA3B9D500D45C80 /* ScreenBlurManager.swift in Sources */,
 				6F20B37A2EA3B9D500D45C80 /* CameraOverlayView.swift in Sources */,
 				6F20B37B2EA3B9D500D45C80 /* SettingsWindow.swift in Sources */,
 				6F20B37C2EA3B9D500D45C80 /* NotificationManager.swift in Sources */,
@@ -374,6 +377,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = LPT67TJZ8A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
@@ -401,6 +405,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = LPT67TJZ8A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;

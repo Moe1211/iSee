@@ -194,6 +194,9 @@ class BackgroundMonitoringService: ObservableObject {
         // Handle alert duration tracking for long-term surfing indicator
         handleAlertDurationTracking(for: state)
         
+        // Handle auto-blur privacy overlay
+        handlePrivacyBlur(for: state)
+        
         // Note: Camera overlay is opened manually via "Toggle Camera Feed" menu item
         // or via "Preview" button in notification popup - not automatically on alert
         switch state {
@@ -213,6 +216,22 @@ class BackgroundMonitoringService: ObservableObject {
         case .error:
             // Hide overlay on error
             hideOverlay()
+        }
+    }
+    
+    /// Show or hide the privacy blur based on the current security state
+    /// and user preference.
+    private func handlePrivacyBlur(for state: StateController.SecurityState) {
+        guard preferencesManager.autoBlurEnabled else { return }
+        
+        switch state {
+        case .alert:
+            ScreenBlurManager.shared.showBlur()
+        case .safe, .error:
+            ScreenBlurManager.shared.hideBlur()
+        case .warning:
+            // Don't blur during warning state — only when the alert threshold is crossed
+            break
         }
     }
     

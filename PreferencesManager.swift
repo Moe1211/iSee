@@ -25,6 +25,7 @@ class PreferencesManager: ObservableObject {
         static let notificationsEnabled = "notificationsEnabled"
         static let overlayAutoHideDelay = "overlayAutoHideDelay"
         static let alertThreshold = "alertThreshold"
+        static let autoBlurEnabled = "autoBlurEnabled"
     }
     
     // MARK: - Published Properties
@@ -72,6 +73,12 @@ class PreferencesManager: ObservableObject {
         }
     }
     
+    @Published var autoBlurEnabled: Bool {
+        didSet {
+            userDefaults.set(autoBlurEnabled, forKey: Keys.autoBlurEnabled)
+        }
+    }
+    
     var showWelcomeScreen: Bool {
         get {
             return userDefaults.bool(forKey: Keys.showWelcomeScreen)
@@ -90,6 +97,7 @@ class PreferencesManager: ObservableObject {
         self.notificationsEnabled = userDefaults.object(forKey: Keys.notificationsEnabled) as? Bool ?? true
         self.overlayAutoHideDelay = userDefaults.object(forKey: Keys.overlayAutoHideDelay) as? TimeInterval ?? 10.0
         self.alertThreshold = userDefaults.object(forKey: Keys.alertThreshold) as? TimeInterval ?? 2.0
+        self.autoBlurEnabled = userDefaults.object(forKey: Keys.autoBlurEnabled) as? Bool ?? false
         
         // Load overlay position
         if let data = userDefaults.data(forKey: Keys.overlayPosition),
@@ -110,6 +118,7 @@ class PreferencesManager: ObservableObject {
         notificationsEnabled = true
         overlayAutoHideDelay = 10.0
         alertThreshold = 2.0
+        autoBlurEnabled = false
         overlayPosition = CGPoint(x: 0, y: 0)
         showWelcomeScreen = true
     }

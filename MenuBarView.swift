@@ -13,6 +13,7 @@ struct MenuBarView: View {
     @ObservedObject var controller: MenuBarController
     @ObservedObject var backgroundService = BackgroundMonitoringService.shared
     @ObservedObject var preferencesManager = PreferencesManager.shared
+    @ObservedObject var blurManager = ScreenBlurManager.shared
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -128,7 +129,29 @@ struct MenuBarView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             
-            Divider()
+            // Dismiss Privacy Blur (only visible when blur is active)
+            if blurManager.isBlurring {
+                Button(action: {
+                    controller.dismissBlur()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "eye.slash")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 12))
+                        
+                        Text("Dismiss Privacy Blur")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 12))
+                        
+                        Spacer()
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                
+                Divider()
+            }
             
             // Quit
             Button(action: {
